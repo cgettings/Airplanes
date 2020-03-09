@@ -1,0 +1,241 @@
+---
+title: "testing plotly"
+author: "Chris Gettings"
+date: "3/9/2020"
+output: 
+  html_document: 
+    fig_height: 8
+    fig_width: 8
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE, warning = FALSE, message = FALSE, comment = FALSE, error = FALSE)
+```
+
+```{r loading_libraries}
+
+library(rvest)
+library(jsonlite)
+library(maps)
+library(tidyverse)
+library(lubridate)
+library(glue)
+library(fs)
+library(janitor)
+library(geosphere)
+library(hms)
+library(ggspatial)
+library(sf)
+library(plotly)
+
+```
+
+```{r airports}
+
+airports <- 
+	read_csv(
+		"https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat", 
+		col_names = 
+			c(
+				"airport_id",
+				"name",
+				"city",
+				"country",
+				"iata",
+				"icao",
+				"latitude",
+				"longitude",
+				"altitude",
+				"tzone",
+				"dst",
+				"tzone_name",
+				"type",
+				"source"
+			), 
+		col_types = cols(.default = col_guess())
+	) %>% 
+	mutate(iata = na_if(iata, "\\N"))
+
+
+orig_dest <- 
+	airports %>% 
+	filter(iata %in% c("HKG", "JFK")) %>% 
+	arrange(-longitude)
+
+```
+
+```{r scraping}
+
+base_url <- "https://flightaware.com/live/flight/"
+
+flight_date <- str_remove_all("2020-03-02", "-")
+
+flight_number <- c("CPA846", "CPA845")
+flight_time   <- c("1155Z", "0545Z")
+flight_orig_dest_icao <- c("VHHH/KJFK", "KJFK/VHHH")
+flight_orig_dest_iata <- c("HKG > JFK", "JFK > HKG")
+
+
+flights <- tibble()
+
+for (i in 1:length(flight_number)) {
+	
+	flights <- 
+		read_html(
+			glue(
+				base_url, 
+				"{flight_number[i]}/history/{flight_date}/{flight_time[i]}/{flight_orig_dest_icao[i]}/tracklog"
+			)
+		) %>% 
+		html_nodes("table.prettyTable") %>% 
+		html_table(header = FALSE) %>% 
+		flatten_dfc() %>% 
+		set_names(nm = c("time", "latitude", "longitude", "course", "kts", "mph", "feet", "rate", "reporting_facility")) %>% 
+		slice(-(1:4)) %>% 
+		type_convert(col_types = cols(.default = col_guess())) %>% 
+		drop_na(reporting_facility, latitude, longitude) %>% 
+		mutate(
+			latitude = latitude %>% str_sub(start = 1, end = 7) %>% as.numeric(),
+			longitude = longitude %>% str_sub(start = 1, end = 7) %>% as.numeric(),
+			time = time %>% str_sub(start = 1, end = 12),
+			flight_date = as_date(flight_date[i]),
+			flight_date_chr = as.character(flight_date),
+			start_end = flight_orig_dest_iata[i]
+		) %>% 
+		drop_na(latitude, longitude) %>% 
+		bind_rows(flights, .)
+	
+}
+
+
+#-----------------------------------------------------------------------------------------#
+# Midpoints(ish) of paths
+#-----------------------------------------------------------------------------------------#
+
+# flights_mid <- 
+# 	flights %>% 
+# 	group_by(start_end) %>% 
+# 	group_modify( ~ slice(.x, 1:round(nrow(.x)/2))) %>%
+# 	select(start_end, longitude, latitude)
+
+```
+
+```{r great_circle}
+
+great_circle <-
+	gcIntermediate(
+		p1 = c(head(orig_dest$longitude, 1), head(orig_dest$latitude, 1)),
+		p2 = c(tail(orig_dest$longitude, 1), tail(orig_dest$latitude, 1)),
+		n = 100
+	) %>%
+	as_tibble() %>%
+	rename(longitude = lon, latitude = lat)
+
+great_circle_mid <- 
+	great_circle %>% 
+	slice(round(nrow(.)/2)) %>% 
+	select(longitude, latitude)
+
+```
+
+```{r plotting}
+
+geo <- 
+	list(
+		showland = TRUE,
+		showlakes = TRUE,
+		showcountries = TRUE,
+		showocean = TRUE,
+		countrywidth = .5,
+		landcolor = toRGB("grey20"),
+		lakecolor = toRGB("gray30"),
+		oceancolor = toRGB("gray70"),
+		center = list(lon = great_circle_mid$longitude, lat = great_circle_mid$latitude),
+		projection = 
+			list(
+				type = 'orthographic',
+				rotation = list(
+					lon = great_circle_mid$longitude, 
+					lat = great_circle_mid$latitude,
+					roll = 0
+				)
+			),
+		lonaxis = 
+			list(
+				showgrid = TRUE,
+				gridcolor = toRGB("gray20"),
+				gridwidth = 0.25
+			),
+		lataxis = 
+			list(
+				showgrid = TRUE,
+				gridcolor = toRGB("gray20"),
+				gridwidth = 0.25
+			)
+	)
+
+
+flights_fig <- 
+	plot_geo() %>% 
+	add_paths(
+		data = group_by(flights, start_end),
+		x = ~ longitude,
+		y = ~ latitude,
+		color = ~ start_end,
+		colors = c("red", "blue", "white"),
+		hoverinfo = "none"
+	) %>%
+	add_paths(
+		data = great_circle,
+		x = ~ longitude,
+		y = ~ latitude,
+		color = "white",
+		hoverinfo = "none"
+	) %>% 
+	add_text(
+		data = orig_dest,
+		x = ~ longitude,
+		y = ~ latitude,
+		text = ~ iata,
+		textfont = 
+			list(
+				family = "arial",
+				size = 30,
+				color = "cyan"
+			),
+		textposition = "middle-right"
+	) %>%
+	add_text(
+		data = orig_dest,
+		x = ~ longitude,
+		y = ~ latitude,
+		text = "\u2708",
+		textfont = 
+			list(
+				family = "arial",
+				size = 40,
+				color = "cyan"
+			),
+		textposition = "middle-left"
+	) %>%
+	layout(
+		showlegend = FALSE, 
+		geo = geo,
+		hoverlabel = 
+			list(
+				bgcolor = "black",
+				bordercolor = "white"
+			),
+		hovermode = "closest",
+		clickmode = "event"
+	)
+
+```
+
+```{r printing}
+
+flights_fig
+
+```
+
