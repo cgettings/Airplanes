@@ -1,11 +1,9 @@
 ---
 title: "testing plotly"
-author: "Chris Gettings"
-date: "3/9/2020"
 output: 
   html_document: 
-    fig_height: 8
-    fig_width: 8
+    fig_height: 6
+    fig_width: 6
     theme: cosmo
 ---
 
