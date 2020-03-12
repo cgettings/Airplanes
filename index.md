@@ -1,5 +1,15 @@
-<iframe src="https://cgettings.github.io/Airplanes/testing-plotly.html" style="border:none; background:none" height="1000" width="1000"> 
+# Plotly map
+
+<iframe src="testing-plotly.html" style="border:none; background:none" width=900 height=900>
 </iframe>
+
+([Plot code](/code/testing plotly.Rmd))
+
+# Static map
+
+<img src="plots/HKG - JFK, JFK - HKG.png" width="800">
+
+([Plot code](/code/plotting_flights.R))
 
 # Data sources
 

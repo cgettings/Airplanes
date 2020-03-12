@@ -1,9 +1,9 @@
 ---
-title: "testing plotly"
+title: ""
 output: 
   html_document: 
-    fig_height: 6
-    fig_width: 6
+    fig_height: 8
+    fig_width: 8
     theme: cosmo
 ---
 
@@ -142,13 +142,16 @@ great_circle_mid <-
 geo <- 
 	list(
 		showland = TRUE,
-		showlakes = TRUE,
+		showlakes = FALSE,
 		showcountries = TRUE,
 		showocean = TRUE,
+		showrivers = FALSE,
 		countrywidth = .5,
 		landcolor = toRGB("grey20"),
-		lakecolor = toRGB("gray30"),
+		# lakecolor = toRGB("gray30"),
 		oceancolor = toRGB("gray70"),
+		countrycolor = toRGB("gray30"),
+		resolution = "110",
 		center = list(lon = great_circle_mid$longitude, lat = great_circle_mid$latitude),
 		projection = 
 			list(
@@ -163,19 +166,24 @@ geo <-
 			list(
 				showgrid = TRUE,
 				gridcolor = toRGB("gray20"),
-				gridwidth = 0.25
+				gridwidth = 0.25,
+				dtick = 10
 			),
 		lataxis = 
 			list(
 				showgrid = TRUE,
 				gridcolor = toRGB("gray20"),
-				gridwidth = 0.25
+				gridwidth = 0.25,
+				dtick = 10
 			)
 	)
 
 
 flights_fig <- 
-	plot_geo() %>% 
+	plot_geo(
+		height = 800,
+		width = 800
+	) %>% 
 	add_paths(
 		data = group_by(flights, start_end),
 		x = ~ longitude,
