@@ -6,8 +6,7 @@
 ![](/plots/flights_per_hour.png)
 ([Plot code](/code/graph_plots.R))
 
-![](/plots/videos/LGA_Arrivals_30_sec_-_2020-03-16_vs._2020-04-06.mp4)
-
+<iframe width="560" height="315" src="https://www.youtube.com/embed/aRf9fQNoPa0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 # plotly map of a flight from Hong Kong to JFK
 
