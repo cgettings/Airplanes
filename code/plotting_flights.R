@@ -123,7 +123,7 @@ for (i in 1:length(flight_number)) {
 		html_table(header = FALSE) %>% 
 		flatten_dfc() %>% 
 		set_names(nm = c("time", "latitude", "longitude", "course", "kts", "mph", "feet", "rate", "reporting_facility")) %>% 
-		slice(-(1:4)) %>% 
+		slice(-(1:3)) %>% 
 		type_convert(col_types = cols(.default = col_guess())) %>% 
 		drop_na(reporting_facility, latitude, longitude) %>% 
 		mutate(
@@ -628,8 +628,6 @@ flights_plot <-
 				great_circle_mid$longitude,
 				0
 			)
-		# xlim = c(min(flights$longitude), max(flights$longitude)),
-		# ylim = c(min(flights$latitude), max(flights$latitude))
 	) +
 
 	theme_bw() +
@@ -659,9 +657,6 @@ ggsave(
 	height = 10
 )
 
-# Rochester:
-# 43.226306, -77.644908
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # #
@@ -669,21 +664,3 @@ ggsave(
 # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-# TABLE WTH SOME EXAMPLE FLIGHT PAIRS
-# CAN SELECT FROM THEM (SELECT ORIG/DEST)
-
-# LONGEST FLIGHTS BEYWEEN MAJOR AIRPOTS
-
-# LONGEST FLIGHTS FROM JFK, WITH PAIRED FLIGHT BACK FROM EACH AIRPORT
-
-# ADD A DATE SELECTOR
-# 
-
-
-ggplotly(flights_plot)
-
-
-nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
-plot_ly() %>% add_sf(data = nc)
-
