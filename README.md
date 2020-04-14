@@ -12,10 +12,11 @@
 
 **[(YouTube)](https://www.youtube.com/embed/aRf9fQNoPa0)**
 
-[Code for creating map frames]("/code/Mapping LGA flight history.R")
-[Code for creating graph frames]("/code/Graphing LGA flight history.R")
-[Code for creating animations (with FFmpeg)]("/code/Animating LGA flight history.R")
-[Code for combining videos (with FFmpeg)]("/code/Stacking LGA flight history.R")
+
+[Code for creating map frames](/code/Mapping_LGA_flight_history.R)  
+[Code for creating graph frames](/code/Graphing_LGA_flight_history.R)  
+[Code for creating animations (with FFmpeg)](/code/Animating_LGA_flight_history.R)  
+[Code for combining videos (with FFmpeg)](/code/Stacking_LGA_flight_history.R)  
 
 # plotly map of a flight from Hong Kong to JFK
 
