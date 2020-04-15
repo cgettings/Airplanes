@@ -21,6 +21,6 @@
 ![](/plots/flights_per_hour.png)
 ([Plot code](/code/graph_plots.R))
 
-# plotly map of a flight from Hong Kong to JFK
+# Plotly map of a flight from Hong Kong to JFK
 
 https://cgettings.github.io/Airplanes/
