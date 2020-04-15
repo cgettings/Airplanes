@@ -6,7 +6,7 @@
 
 # Plotly map
 
-<iframe src="testing-plotly.html" style="border:none; background:none" width=900 height=900>
+<iframe src="docs/testing-plotly.html" style="border:none; background:none" width=900 height=900>
 </iframe>
 
 ([Plot code](/code/testing plotly.Rmd))
